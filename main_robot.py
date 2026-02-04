@@ -1,28 +1,19 @@
-"""
-Unified entrypoint:
-- Runs the Wall-E Flask web interface (web joystick UI)
-- Runs the quadruped gait loop in a separate thread
 
-Integration strategy (minimal edits):
-- Web UI already POSTs joystick values to `/motor` as stickX/stickY in [-1,1]
-  (see `web_interface/static/js/joystick.js`).
-- `web_interface/app.py` now (optionally) calls `controllers.web_shared_command.set_command`.
-- The quadruped uses a controller function; we provide `controllers.web_joystick_controller.controller`
-  which reads the shared command and converts it to the momentum vector expected by
-  `gait_logic/quadruped.py`.
-"""
 
 from __future__ import annotations
 
 import os
 import sys
 import threading
-import time
+
+_ROOT = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+os.chdir(_ROOT)
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
 
 
 def _import_web_app():
-    root = os.path.abspath(os.path.dirname(__file__))
-    web_dir = os.path.join(root, "web_interface")
+    web_dir = os.path.join(_ROOT, "web_interface")
     if web_dir not in sys.path:
         sys.path.insert(0, web_dir)
     # Import after sys.path tweak so `from picamera2_stream import ...` works.
